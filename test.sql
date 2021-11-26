@@ -1,10 +1,10 @@
--- psql < data.sql
+-- psql < test.sql
 
-DROP DATABASE IF EXISTS biztime;
+DROP DATABASE IF EXISTS biztime_test;
 
-CREATE DATABASE biztime;
+CREATE DATABASE biztime_test;
 
-\c biztime
+\c biztime_test
 
 DROP TABLE IF EXISTS invoices CASCADE;
 DROP TABLE IF EXISTS companies CASCADE;
@@ -38,34 +38,19 @@ CREATE TABLE industries_companies (
   PRIMARY KEY(company_code, industry_code)
 );
 
-INSERT INTO companies
-  VALUES ('apple', 'Apple Computer', 'Maker of OSX.'),
-         ('ibm', 'IBM', 'Big blue.'),
-         ('ford', 'Ford Motor Company', 'Vroom vroom'),
-         ('ver', 'verizon', 'Can you hear me now?');
-
-INSERT INTO invoices (comp_Code, amt, paid, paid_date)
-  VALUES ('apple', 100, false, null),
-         ('apple', 200, false, null),
-         ('apple', 300, true, '2018-01-01'),
-         ('ibm', 400, false, null),
-         ('ford', 200, true, '2021-04-05'),
-         ('ford', 100, false, null),
-         ('ver', 150, false, null);
-
-INSERT INTO industries
-VALUES ('mnf', 'manufacturing'),
-      ('tech', 'high tech'),
-('tran', 'transportation'),
-('ent', 'entertainment');
-
-INSERT INTO industries_companies
-VALUES ('apple', 'tech'),
-('apple', 'mnf'),
-('ibm', 'tech'),
-('ford', 'mnf'),
-('ford', 'tran');
 
 
 
 
+
+
+
+-- INSERT INTO companies (code, name, description)
+-- VALUES ('ibm', 'ibm', 'Big Blue');
+
+
+-- INSERT INTO invoices (comp_code, amt, paid, paid_date)
+-- VALUES ('ibm', 100, false, null);
+
+
+    

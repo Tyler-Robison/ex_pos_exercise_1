@@ -45,9 +45,9 @@ router.post('/', async (req, res, next) => {
     try {
         const { comp_code, amt, paid, paid_date } = req.body;
         const results = await db.query(`INSERT INTO invoices (comp_code, amt, paid, paid_date) 
-      VALUES ($1, $2, $3, $4) RETURNING id, comp_code, amt, paid, add_date paid_date`,
+      VALUES ($1, $2, $3, $4) RETURNING id, comp_code, amt, paid, add_date, paid_date`,
             [comp_code, amt, paid, paid_date])
-            // debugger;
+        // debugger;
         return res.status(201).json({ invoice: results.rows[0] })
     } catch (err) {
         return next(err)
@@ -56,18 +56,31 @@ router.post('/', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
     try {
-        const { amt } = req.body;
+        let { amt, paid } = req.body;
         const { id } = req.params
+
         const result = await db.query(
-            `UPDATE invoices SET amt=$1
-        WHERE id = $2`,
-            [amt, id]
-        );
+            `SELECT * FROM invoices WHERE id = $1`,[id]);
 
         if (result.rowCount === 0) {
-            const error = new ExpressError('id not found', 404)
+            const error = new ExpressError(`Invoice with id ${id} not found`, 404)
             return next(error);
         }
+
+        const currentPaidDate = result.rows[0].paid_date
+
+        if (!currentPaidDate && paid === true) paid_date = new Date()
+        else if (paid === false){
+            paid_date = null;
+        } else {
+            paid_date = currentPaidDate
+        }
+
+        await db.query(
+            `UPDATE invoices SET amt=$1, paid=$2, paid_date=$3
+        WHERE id = $4`,
+            [amt, paid, paid_date, id]
+        );
 
         const updatedInvoice = await db.query(
             `SELECT * FROM invoices
@@ -103,7 +116,7 @@ router.delete('/:id', async (req, res, next) => {
 router.get('/companies/:code', async (req, res, next) => {
     try {
         const { code } = req.params
-            // Get company info
+        // Get company info
         const results = await db.query(
             `SELECT * FROM companies
             WHERE code=$1`,
@@ -114,8 +127,8 @@ router.get('/companies/:code', async (req, res, next) => {
             const error = new ExpressError('code not found', 404)
             return next(error);
         }
-    
-        const compObj = {company: results.rows[0]}
+
+        const compObj = { company: results.rows[0] }
 
         // Get invoices for the same company
         const invoiceResults = await db.query(
